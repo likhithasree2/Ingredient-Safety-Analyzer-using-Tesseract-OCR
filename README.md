@@ -18,7 +18,7 @@ Openpyxl(3.1.2): Openpyxl is used for reading data from Excel files. Install it 
 Tkinter: Tkinter is Python's de-facto standard GUI (Graphical User Interface) package. It should be included with most Python installations.
 Note: Download Tesseract from github: https://github.com/UB-Mannheim/tesseract/wiki --> Download .exe file and set path in system environment variables, then chech tessseract --version in cmd.
 
-## Clone or download the repository to your local machine.
+*Clone or download the repository to your local machine.*
 
 ## Usage
 1. Run the `code.py` file.
