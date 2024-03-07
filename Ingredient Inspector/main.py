@@ -3,69 +3,88 @@ import pytesseract
 import openpyxl
 import tkinter as tk
 from tkinter import filedialog
+import wikipedia
+from tkinter import ttk
 
-# Loads the XLSX file with harmful ingredients and safety percentages
 wb = openpyxl.load_workbook('harmful_ingredients.xlsx')
 sheet = wb.active
 
-# Creates a list to store the harmful ingredients
-harmful_ingredients = []
+harmful_ingredients = {}
 
-# Iterates through the rows in the XLSX file
-for row in sheet.iter_rows(min_row=2, values_only=True):
-    ingredient, safety_percentage = row
-    harmful_ingredients.append((ingredient.lower(), safety_percentage))
+def fetch_wikipedia_definition(ingredient):
+    try:
+        return wikipedia.summary(ingredient, sentences=2)
+    except wikipedia.exceptions.DisambiguationError as e:
+        return wikipedia.summary(e.options[0], sentences=2)
+    except (wikipedia.exceptions.PageError, wikipedia.exceptions.WikipediaException):
+        return None
 
-# Function to check if a product is safe or unsafe
 def check_safety(product_text):
-    for ingredient, _ in harmful_ingredients:
-        if ingredient in product_text.lower():
-            return "The Product Ingredients are NOT SAFE"
-    return "The Product Ingredients are SAFE"
+    unsafe_ingredients = []
+    for row in sheet.iter_rows(min_row=2, values_only=True):
+        ingredient, _ = row
+        if ingredient.lower() in product_text.lower():
+            unsafe_ingredients.append(ingredient.lower())
+    return unsafe_ingredients
 
-# Function to open the file dialog and process the image
 def process_image():
     root = tk.Tk()
     root.withdraw()
     file_path = filedialog.askopenfilename(filetypes=[("Image files", "*.jpg *.jpeg *.png *.bmp")])
 
     if not file_path:
-        result_label.config(text="No image selected", fg="red")
+        result_label.config(text="No image selected", fg="#FF5733")
     else:
         image = cv2.imread(file_path)
         product_text = pytesseract.image_to_string(image)
-        safety_result = check_safety(product_text)
-        result_label.config(text=safety_result, fg="red" if "NOT SAFE" in safety_result else "green")
+        unsafe_ingredients = check_safety(product_text)
+        if unsafe_ingredients:
+            result_text = "The Product is Not Recommended due to UNSAFE Ingredients."
+            result_label.config(text=result_text, fg="#FF5733", font=("Arial", 18, "bold"), justify="center")
 
-# Creates the main window
+            definitions_text = ""
+            for idx, ingredient in enumerate(unsafe_ingredients, start=1):
+                definition = fetch_wikipedia_definition(ingredient)
+                if definition:
+                    definitions_text += f"\n\n{idx}. {ingredient.capitalize()}:\n{definition}"
+                else:
+                    definitions_text += f"\n\n{idx}. {ingredient.capitalize()}:\nDefinition not found."
+            definitions_label.config(text=definitions_text, fg="black", font=("Arial", 14), justify="left", wraplength=600)
+        else:
+            result_label.config(text="The Product is SAFE to Use. All Ingredients are Safe.", fg="#2ECC71", font=("Arial", 18, "bold"), justify="center")
+            definitions_label.config(text="", fg="black")
+
 window = tk.Tk()
 window.title("Ingredient Inspector")
+window.geometry("800x600")
+window.configure(bg="#ECF0F1")
 
-# Sets window dimensions
-window.geometry("800x400")
-
-# Creates frames to style different sections
-header_frame = tk.Frame(window, bg="#87CEFA")  # Light blue for the header
+header_frame = tk.Frame(window, bg="#3498DB")
 header_frame.pack(fill="x")
 
-content_frame = tk.Frame(window, bg="#E6E6FA")  # Light purple for the content
-content_frame.pack(fill="both", expand=True)
+content_frame = tk.Frame(window, bg="#ECF0F1")
+content_frame.pack(fill="both", expand=True, padx=50, pady=30)
 
-# Creates a label with the title in the header frame
-title_label = tk.Label(header_frame, text="Ingredient Inspector", font=("Arial", 28), bg="#87CEFA")
-title_label.pack(pady=20)
+title_label = tk.Label(header_frame, text="Ingredient Inspector", font=("Helvetica", 28, "bold"), bg="#3498DB", fg="white")
+title_label.pack(pady=20, padx=20, anchor="nw")
 
-# Adds a label for the upload instructions in the content frame
-upload_label = tk.Label(content_frame, text="Please upload your image here", font=("Arial", 14), bg="#E6E6FA")
+upload_label = tk.Label(content_frame, text="Please upload your image here:", font=("Helvetica", 14), bg="#ECF0F1", fg="#34495E")
 upload_label.pack()
 
-# Creates a button for uploading images in the content frame
-upload_button = tk.Button(content_frame, text="Upload Image", command=process_image, bg="#0073e6", fg="white", font=("Arial", 16))
-upload_button.pack(pady=20)
+tk.Label(content_frame, text="", bg="#ECF0F1").pack(pady=10)
 
-# Creates a label to display the result in the content frame
-result_label = tk.Label(content_frame, text="", font=("Arial", 20), bg="#E6E6FA")
-result_label.pack()
+upload_button = ttk.Button(content_frame, text="Upload Image", command=process_image, style="TButton")
+upload_button.pack()
 
-# Start the GUI event loop
+tk.Label(content_frame, text="", bg="#ECF0F1").pack(pady=20)
+
+result_label = tk.Label(content_frame, text="", bg="#ECF0F1", justify="center")
+result_label.pack(pady=20)
+
+definitions_label = tk.Label(content_frame, text="", bg="#ECF0F1", justify="left", wraplength=600, font=("Arial", 16, "bold"))
+definitions_label.pack(pady=20)
+
+style = ttk.Style()
+style.configure("TButton", padding=10, relief="flat", background="#2E86C1", foreground="black", font=("Helvetica", 16))
+
 window.mainloop()
