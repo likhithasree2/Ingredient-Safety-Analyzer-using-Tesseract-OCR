@@ -13,7 +13,7 @@ stored in an Excel spreadsheet. Additionally, it fetches definitions for detecte
 ## Prerequisites:
 Before running the application, ensure you have the following dependencies installed:
 - Python 3.10
-- OpenCV (cv2) 4.5.4.60: OpenCV (cv2) is used for image processing tasks. Install using `pip install opencv-python`.
+- OpenCV (cv2) 4.5.4.60: OpenCV is used for image processing tasks. Install using `pip install opencv-python`.
 - Pytesseract 0.3.10: Pytesseract is a Python wrapper for Google's Tesseract OCR engine  for optical character recognition (OCR). Install using `pip install pytesseract`.
 - Openpyxl 3.1.2: Openpyxl is used for reading data from Excel files. Install using `pip install openpyxl`.
 - Wikipedia 1.4.0: Install using `pip install wikipedia`.
