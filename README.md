@@ -1,4 +1,4 @@
-## Overview:
+## Ingredient-Safety-Analyzer-using-Tesseract-OCR
 Ingredient Inspector is a Python application designed to assist users in determining the safety of product ingredients by comparing them to a predefined list of harmful ingredients. 
 The application utilizes image processing techniques to extract text from images containing product ingredient lists, which are then cross-referenced with a database of harmful ingredients 
 stored in an Excel spreadsheet. Additionally, it fetches definitions for detected harmful ingredients from Wikipedia to provide users with more detailed information.
